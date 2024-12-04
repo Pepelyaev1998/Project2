@@ -1,0 +1,59 @@
+﻿@model Project2.ViewModels.RegisterModel
+
+<!DOCTYPE html>
+<html>
+<body class="bg-secondary">
+    <div class="row h-100 justify-content-center align-items-center jumbotron bg-secondary">
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = " p-4 justify-content-center align-items-center" }))
+        {
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                    <div class="navbar-header">
+                        <h4>Adding a new user</h4>
+                        <hr />
+                        @Html.ValidationSummary(true)
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope-at-fill"></i>
+                                </span>
+                                <input type="text" class="form-control" placeholder="Email" asp-for="Email">
+                                @Html.ValidationMessageFor(u => u.Email)
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-key-fill"></i>
+                                </span>
+                                <input type="password" class="form-control" placeholder="Password" asp-for="Password">
+                                @Html.ValidationMessageFor(u => u.Password)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-check"></i>
+                                </span>
+                                <input type="password" class="form-control" placeholder="Confirm password" asp-for="ConfirmPassword">
+                                @Html.ValidationMessageFor(u => u.ConfirmPassword)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary ">
+                                Register <i class="bi bi-person-plus"></i>
+                            </button>
+                            <button type="submit" class="btn btn-primary" asp-action="AccountManager" asp-controller="Account" formmethod="get">
+                                Back <i class="bi bi-arrow-return-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+</body>
+</html>

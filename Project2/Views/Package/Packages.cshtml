@@ -1,0 +1,68 @@
+﻿@using System.Security.Claims
+@model IEnumerable<Project2.Models.Package>
+@{
+    ViewData["Title"] = "Home Page";
+    var isAdmin = User.FindFirst(x => x.Type.Equals(ClaimsIdentity.DefaultRoleClaimType)).Value.Equals("admin");
+    var currentUser = isAdmin ? "users" : "administrator";
+}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Packages <i class="bi bi-boxes"></i></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse" id="navbarScroll">
+            <form class="d-flex" asp-action="Packages" asp-controller="Package" method="post">
+                <input class="form-control me-2" name="searchString" type="search" placeholder="Search track number" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search <i class="bi bi-search"></i></button>
+            </form>
+
+        </div> <div class="float-right">
+            @if (isAdmin)
+            {
+                <button type="button" onclick="location.href='@Url.Action("AddPackage","Package")'" class="btn btn-outline-dark mr-2">Add Package  <i class="bi bi-plus"></i><i class="bi bi-box-seam"></i></button>
+                <button type="button" onclick="location.href='@Url.Action("AccountManager","Account")'" class="btn btn-outline-dark mr-2">Users <i class="bi bi-people-fill"></i></button>
+            }
+            <button type="button" onclick="location.href='@Url.Action("Support","Home")'" class="btn btn-outline-dark mr-2">Send message to @currentUser <i class="bi bi-send-plus-fill"></i></button>
+            <button type="button" onclick="location.href='@Url.Action("Logout","Account")'" class="btn btn-outline-dark">Exit <i class="bi bi-box-arrow-right"></i></button>
+        </div>
+    </div>
+</nav>
+<table class="table table-striped table-hover">
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Track Number</th>
+        <th scope="col">Starting Point</th>
+        <th scope="col">End Point</th>
+        <th scope="col">Last Location</th>
+        <th scope="col">Current State</th>
+        <th scope="col">
+            <a asp-action="Packages" asp-route-sortOrder="@ViewBag.LastDateOfUpdate">
+                Last Date Of Update <i class="bi bi-funnel-fill"></i>
+            </a>
+        </th>
+        @if (isAdmin)
+        {
+            <th scope="col">Action</th>
+        }
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <th scope="row">@item.Id</th>
+            <td>@item.TrackNumber</td>
+            <td>@item.StartingPoint</td>
+            <td>@item.EndPoint</td>
+            <td>@item.LastLocation</td>
+            <td>@item.CurrentState</td>
+            <td>@item.LastDateOfUpdate</td>
+            @if (isAdmin)
+            {
+                <td>
+                    <a asp-action="EditPackage" asp-controller="Package" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
+                    <a asp-action="DeletePackage" asp-controller="Package" asp-route-id="@item.Id">Delete <i class="bi bi-trash-fill"></i></a>
+                </td>
+            }
+        </tr>
+    }
+</table>
