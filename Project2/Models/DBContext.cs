@@ -7,6 +7,7 @@ namespace Project2.Models
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Package> Packages { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DBContext(DbContextOptions<DBContext> options)
             : base(options)
         {

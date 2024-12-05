@@ -8,16 +8,14 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Packages <i class="bi bi-boxes"></i></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation"></button>
         <div class="navbar-collapse" id="navbarScroll">
             <form class="d-flex" asp-action="Packages" asp-controller="Package" method="post">
                 <input class="form-control me-2" name="searchString" type="search" placeholder="Search track number" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search <i class="bi bi-search"></i></button>
             </form>
-
-        </div> <div class="float-right">
+        </div>
+        <div class="float-right">
             @if (isAdmin)
             {
                 <button type="button" onclick="location.href='@Url.Action("AddPackage","Package")'" class="btn btn-outline-dark mr-2">Add Package  <i class="bi bi-plus"></i><i class="bi bi-box-seam"></i></button>

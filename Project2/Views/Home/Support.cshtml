@@ -3,34 +3,34 @@
     var userEmail = User.Identity.Name;
     var isAdmin = User.FindFirst(x => x.Type.Equals(ClaimsIdentity.DefaultRoleClaimType)).Value.Equals("admin");
     var hidden = isAdmin ? "" : "hidden";
+    var textForMessageInput = isAdmin ? "Give an answer to users" : "Discribe your problems";
 }
 
 <div class="row">
     <div class="col-lg-6 col-md-6">
-        <form>
-            <label class="form-label">From Email</label>
+                  <label class="form-label">From Email</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-envelope-at-fill"></i></span>
                 <input type="text" class="form-control" value="@userEmail" disabled aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
             </div>
-            @if (isAdmin)
-            {
+            <div @hidden>
                 <label class="form-label">To Email</label>
                 <div class="input-group has-validation">
                     <span class="input-group-text"><i class="bi bi-envelope-at-fill"></i></span>
                     <input type="text" class="form-control" id="receiver" onkeyup="check();" aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
                 </div>
-            }
+            </div>
             <label for="messageInput" class="form-label">Text field</label>
-            <textarea rows="7" class="form-control" id="messageInput" onkeyup="check();" placeholder="Discribe your problems" required></textarea>
-            <button class="btn btn-primary mt-2" id="sendButton" type="submit">Send <i class="bi bi-envelope-arrow-up-fill"></i></button>
-            <button id="back" type="submit" class="btn btn-primary mt-2" asp-action="Packages" asp-controller="Package" formmethod="get">Back <i class="bi bi-arrow-return-left"></i></button>
-        </form>
+            <textarea rows="7" class="form-control" id="messageInput" onkeyup="check();" placeholder="@textForMessageInput" required></textarea>
+            <button class="btn btn-primary mt-2" id="sendButton" type="submit" href="#">Send <i class="bi bi-envelope-arrow-up-fill"></i></button>
+            <button id="back" type="submit" class="btn btn-primary mt-2" asp-action="Packages" asp-controller="Package" formmethod="get">Back <i class="bi bi-arrow-return-left"></i></button>       
     </div>
     <div class="col-lg-6 col-md-6">
         <hr />
         <ul id="messagesList"></ul>
     </div>
+</div>
+
     <script src="~/js/signalr/dist/browser/signalr.min.js"></script>
     <script>
         var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
@@ -53,10 +53,10 @@
          connection.start();
 
         function check() {
-        if ($('#messageInput').val() != '' && $('#receiver').val() != '')
-            $('#sendButton').removeAttr('disabled');
+        if (($('#messageInput').val() != '' && $('#receiver').val() != '') || ($('#messageInput').val() != '' && !(@isAdmin.ToString().ToLower())))
+            document.getElementById("sendButton").disabled = false;
         else
-            $('#sendButton').attr('disabled','disable');
+            document.getElementById("sendButton").disabled = true;
           };
 
 
