@@ -37,10 +37,15 @@
 
         document.getElementById("sendButton").disabled = true;
 
-        connection.on("ReceiveMessage", function (message, user) {
+        connection.on("ReceiveMessage", function (message, user, to) {
             var li = document.createElement("li");
             document.getElementById("messagesList").appendChild(li);
+            if(to!=undefined){
+            li.textContent = `${user} : ${message} Message to ---------------> ${to}`;
+            }
+            else{
             li.textContent = `${user} : ${message}`;
+            }
         });
 
         connection.on("Notify", function (message) {
