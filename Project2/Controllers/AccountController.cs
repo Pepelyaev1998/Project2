@@ -114,7 +114,7 @@ namespace Project2.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        [HttpGet]
+        [HttpDelete]
         public async Task<IActionResult> DeleteUser(int? id)
         {
             if (id != null)
@@ -124,10 +124,10 @@ namespace Project2.Controllers
                 {
                     db.Users.Remove(user);
                     await db.SaveChangesAsync();
-                    return RedirectToAction("AccountManager");
+                    return Ok("success");
                 }
             }
-            return NotFound();
+            return BadRequest();
         }
 
         [Authorize(Roles = "admin")]

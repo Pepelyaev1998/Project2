@@ -8,70 +8,91 @@
 
 <div class="row">
     <div class="col-lg-6 col-md-6">
-                  <label class="form-label">From Email</label>
-            <div class="input-group">
+        <label class="form-label">From Email</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-at-fill"></i></span>
+            <input type="text" class="form-control" value="@userEmail" disabled aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
+        </div>
+        <div @hidden>
+            <label class="form-label">To Email</label>
+            <div class="input-group has-validation">
                 <span class="input-group-text"><i class="bi bi-envelope-at-fill"></i></span>
-                <input type="text" class="form-control" value="@userEmail" disabled aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
+                <input type="text" class="form-control" id="receiver" onkeyup="check();" aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
             </div>
-            <div @hidden>
-                <label class="form-label">To Email</label>
-                <div class="input-group has-validation">
-                    <span class="input-group-text"><i class="bi bi-envelope-at-fill"></i></span>
-                    <input type="text" class="form-control" id="receiver" onkeyup="check();" aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
-                </div>
-            </div>
-            <label for="messageInput" class="form-label">Text field</label>
-            <textarea rows="7" class="form-control" id="messageInput" onkeyup="check();" placeholder="@textForMessageInput" required></textarea>
-            <button class="btn btn-primary mt-2" id="sendButton" type="submit" href="#">Send <i class="bi bi-envelope-arrow-up-fill"></i></button>
-            <button id="back" type="submit" class="btn btn-primary mt-2" asp-action="Packages" asp-controller="Package" formmethod="get">Back <i class="bi bi-arrow-return-left"></i></button>       
+        </div>
+        <label for="messageInput" class="form-label">Text field</label>
+        <textarea rows="7" class="form-control" id="messageInput" onkeyup="check();" placeholder="@textForMessageInput" required></textarea>
+        <button class="btn btn-primary mt-2" id="sendButton" type="submit" href="#">Send <i class="bi bi-envelope-arrow-up-fill"></i></button>
+        <button id="back" type="submit" class="btn btn-primary mt-2" asp-action="Packages" asp-controller="Package" formmethod="get">Back <i class="bi bi-arrow-return-left"></i></button>
     </div>
-    <div class="col-lg-6 col-md-6">
+    <div id="right-block" class="col-lg-6 col-md-6">
         <hr />
         <ul id="messagesList"></ul>
+        @if (isAdmin)
+        {
+            <button id="delete" type="submit" class="btn btn-primary mt-2">Delete messages <i class="bi bi-trash3-fill"></i></button>
+        }
     </div>
 </div>
 
-    <script src="~/js/signalr/dist/browser/signalr.min.js"></script>
-    <script>
-        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
+    document.getElementById("sendButton").disabled = true;
+
+    connection.on("ReceiveMessage", function (message, user, to) {
+        var li = document.createElement("li");
+        document.getElementById("messagesList").appendChild(li);
+        if(to!=undefined){
+        li.textContent = `${user} : ${message} Message to ---------------> ${to}`;
+        }
+        else{
+        li.textContent = `${user} : ${message}`;
+        }
+    });
+
+    connection.on("Notify", function (message) {
+
+              var p = document.createElement("p");
+        document.getElementById("right-block").prepend(p);
+        p.textContent = `${message}`;
+        });
+
+     connection.start();
+
+    function check() {
+    if (($('#messageInput').val() != '' && $('#receiver').val() != '') || ($('#messageInput').val() != '' && !(@isAdmin.ToString().ToLower())))
+        document.getElementById("sendButton").disabled = false;
+    else
         document.getElementById("sendButton").disabled = true;
+      };
 
-        connection.on("ReceiveMessage", function (message, user, to) {
-            var li = document.createElement("li");
-            document.getElementById("messagesList").appendChild(li);
-            if(to!=undefined){
-            li.textContent = `${user} : ${message} Message to ---------------> ${to}`;
-            }
-            else{
-            li.textContent = `${user} : ${message}`;
-            }
-        });
 
-        connection.on("Notify", function (message) {
+    document.getElementById("sendButton").addEventListener("click", function (event) {
+        var user = document.getElementById("receiver").value;
+        var message = document.getElementById("messageInput").value;
+        connection.invoke("SendMessage", message, user);
+        document.getElementById('receiver').value = '';
+        document.getElementById('messageInput').value='';
+    });
 
-                  var li = document.createElement("li");
-            document.getElementById("messagesList").appendChild(li);
-            li.textContent = `${message}`;
+     document.getElementById("back").addEventListener("click", function (event) {
+      location.href='@Url.Action("Packages","Package")';
+    });
+
+    document.getElementById("delete").addEventListener("click", function (event) {
+                $.ajax({
+                type: "DELETE",
+                url: "@Url.Action("DeleteMessages","Home")",
+                dataType: "text",
+                success: function () {
+                 document.getElementById("messagesList").innerHTML = '';
+                 document.getElementById('receiver').value = '';
+                  document.getElementById('messageInput').value='';
+                },
+                error: function (xhr, status, error) {
+                    console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                }
             });
-
-         connection.start();
-
-        function check() {
-        if (($('#messageInput').val() != '' && $('#receiver').val() != '') || ($('#messageInput').val() != '' && !(@isAdmin.ToString().ToLower())))
-            document.getElementById("sendButton").disabled = false;
-        else
-            document.getElementById("sendButton").disabled = true;
-          };
-
-
-        document.getElementById("sendButton").addEventListener("click", function (event) {
-            var user = document.getElementById("receiver").value;
-            var message = document.getElementById("messageInput").value;
-            connection.invoke("SendMessage", message, user);
         });
-
-         document.getElementById("back").addEventListener("click", function (event) {
-          location.href='@Url.Action("Packages","Package")';
-        });
-    </script>
+</script>

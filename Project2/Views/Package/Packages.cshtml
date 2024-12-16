@@ -59,9 +59,33 @@
             {
                 <td>
                     <a asp-action="EditPackage" asp-controller="Package" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
-                    <a asp-action="DeletePackage" asp-controller="Package" asp-route-id="@item.Id">Delete <i class="bi bi-trash-fill"></i></a>
+                    <a href="#" class="delete">Delete <i class="bi bi-trash-fill"></i></a>
                 </td>
             }
         </tr>
     }
 </table>
+
+<script>
+    $(".delete").click(function (e) {
+              var parent = $(this).parents("tr");
+              var id = parent.find("th:eq(0)").text();
+
+                  $.ajax({
+                  type: "DELETE",
+                  url: "@Url.Action("DeletePackage","Package")",
+                  data: { id: id },
+                  dataType: "text",
+                  success: function (result) {
+                   if (result == "success")
+                       parent.hide();
+                   else
+                       alert(result);
+                  },
+                  error: function (xhr, status, error) {
+                      console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                  }
+              });
+          });
+</script>
+

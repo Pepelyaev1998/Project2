@@ -23,5 +23,13 @@ namespace Project2.Controllers
             return View();
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpDelete]
+        public void DeleteMessages()
+        {
+            db.Messages.RemoveRange(db.Messages);
+            db.SaveChanges();
+        }
+
     }
 }

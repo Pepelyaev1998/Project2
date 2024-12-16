@@ -24,8 +24,8 @@ namespace Project2.Services
             if (string.IsNullOrEmpty(to)) to = adminEmail;
             var userName = Context.User.Identity.Name;
             var isAdmin = Context.User.FindFirst(x => x.Type.Equals(ClaimsIdentity.DefaultRoleClaimType)).Value.Equals("admin");
-            //await Clients.All.SendAsync("ReceiveMessage", user, message);
-            if (Context.UserIdentifier != to) // если получатель и текущий пользователь не совпадают
+
+            if (Context.UserIdentifier != to)
                 await Clients.User(Context.UserIdentifier).SendAsync("ReceiveMessage", message, userName, isAdmin ? to : null);
             await Clients.User(to).SendAsync("ReceiveMessage", message, userName);
             var CurrentUser = db.Users.FirstOrDefaultAsync(u => u.Email.Equals(userName));

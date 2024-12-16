@@ -12,7 +12,7 @@
                         <h4>Adding a new package</h4>
                         <hr />
                         @Html.ValidationSummary(true)
-      <div class="form-group">
+                        <div class="form-group">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-journal-code"></i>
@@ -21,7 +21,7 @@
                                 @Html.ValidationMessageFor(p=>p.TrackNumber)
                             </div>
                         </div>
-                       <div class="form-group">
+                        <div class="form-group">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-geo-fill"></i>
@@ -30,7 +30,7 @@
                                 @Html.ValidationMessageFor(p=>p.StartingPoint)
                             </div>
                         </div>
-                       <div class="form-group">
+                        <div class="form-group">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-pin-map-fill"></i>
@@ -62,7 +62,7 @@
                                 <button type="submit" class="btn btn-primary ">
                                     Add <i class="bi bi-plus-lg"></i>
                                 </button>
-                                 <button type="submit" class="btn btn-primary" asp-action="Packages" asp-controller="Package" formmethod="get">
+                                <button type="submit" class="btn btn-primary" asp-action="Packages" asp-controller="Package" formmethod="get">
                                     Back <i class="bi bi-arrow-return-left"></i>
                                 </button>
                             </div>

@@ -80,7 +80,7 @@ namespace Project2.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        [HttpGet]
+        [HttpDelete]
         public async Task<IActionResult> DeletePackage(int? id)
         {
             if (id != null)
@@ -90,10 +90,10 @@ namespace Project2.Controllers
                 {
                     db.Packages.Remove(package);
                     await db.SaveChangesAsync();
-                    return RedirectToAction("Packages");
+                    return Ok("success");
                 }
             }
-            return NotFound();
+            return BadRequest();
         }
 
         [Authorize(Roles = "admin")]
