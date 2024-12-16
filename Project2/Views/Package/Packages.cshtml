@@ -19,9 +19,10 @@
             @if (isAdmin)
             {
                 <button type="button" onclick="location.href='@Url.Action("AddPackage","Package")'" class="btn btn-outline-dark mr-2">Add Package  <i class="bi bi-plus"></i><i class="bi bi-box-seam"></i></button>
+                <button type="button" onclick="location.href='@Url.Action("ExportToFile","Package")'" class="btn btn-outline-dark mr-2">Packages  <i class="bi bi-download"></i></button>
                 <button type="button" onclick="location.href='@Url.Action("AccountManager","Account")'" class="btn btn-outline-dark mr-2">Users <i class="bi bi-people-fill"></i></button>
             }
-            <button type="button" onclick="location.href='@Url.Action("Support","Home")'" class="btn btn-outline-dark mr-2">Send message to @currentUser <i class="bi bi-send-plus-fill"></i></button>
+            <button type="button" onclick="location.href='@Url.Action("Support","Home")'" class="btn btn-outline-dark mr-2">Send message <i class="bi bi-send-plus-fill"></i></button>
             <button type="button" onclick="location.href='@Url.Action("Logout","Account")'" class="btn btn-outline-dark">Exit <i class="bi bi-box-arrow-right"></i></button>
         </div>
     </div>
