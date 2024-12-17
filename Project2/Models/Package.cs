@@ -2,7 +2,7 @@
 
 namespace Project2.Models
 {
-    public class Package
+    public class Package : Entity
     {
         public int Id { get; set; }
         public string TrackNumber { get; set; }

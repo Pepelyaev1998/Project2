@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using Project2.Models;
+using Project2.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -14,19 +15,19 @@ namespace Project2.Controllers
 {
     public class PackageController : Controller
     {
-        private DBContext db;
+        IEntityRepository entityRepository { get; set; }
         private readonly IHostingEnvironment hostingEnvironment;
 
-        public PackageController(DBContext context, IHostingEnvironment hostingEnvironment)
+        public PackageController(IEntityRepository entityRepository, IHostingEnvironment hostingEnvironment)
         {
-            db = context;
+            this.entityRepository = entityRepository;
             this.hostingEnvironment = hostingEnvironment;
         }
 
         [HttpGet]
         public async Task<IActionResult> Packages(SortState sortOrder)
         {
-            var packages = await db.Packages.ToListAsync();
+            var packages = await entityRepository.Packages.ToListAsync();
             ViewData["LastDateOfUpdate"] = sortOrder == SortState.LastDateOfUpdateAsc ? SortState.LastDateOfUpdateDesc : SortState.LastDateOfUpdateAsc;
             packages = sortOrder switch
             {
@@ -34,13 +35,14 @@ namespace Project2.Controllers
                 SortState.LastDateOfUpdateAsc => packages.OrderBy(p => p.LastDateOfUpdate).ToList(),
                 _ => packages.OrderBy(p => p.TrackNumber).ToList(),
             };
+
             return View(packages);
         }
 
         [HttpPost]
         public async Task<IActionResult> Packages(string searchString)
         {
-            var packages = await db.Packages.ToListAsync();
+            var packages = await entityRepository.Packages.ToListAsync();
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -57,10 +59,12 @@ namespace Project2.Controllers
         {
             if (id != null)
             {
-                var package = await db.Packages.FirstOrDefaultAsync(p => p.Id == id);
+                var package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.Id == id);
                 if (package != null)
+
                     return View(package);
             }
+
             return NotFound();
         }
 
@@ -71,8 +75,9 @@ namespace Project2.Controllers
             if (ModelState.IsValid)
             {
                 package.LastDateOfUpdate = DateTime.Now;
-                db.Packages.Update(package);
-                await db.SaveChangesAsync();
+                entityRepository.SaveEntity(package);
+                await entityRepository.SaveChanges();
+
                 return RedirectToAction("Package");
             }
 
@@ -85,11 +90,12 @@ namespace Project2.Controllers
         {
             if (id != null)
             {
-                var package = await db.Packages.FirstOrDefaultAsync(p => p.Id == id);
+                var package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.Id == id);
                 if (package != null)
                 {
-                    db.Packages.Remove(package);
-                    await db.SaveChangesAsync();
+                    entityRepository.DeleteEntity(package);
+                    await entityRepository.SaveChanges();
+
                     return Ok("success");
                 }
             }
@@ -110,17 +116,18 @@ namespace Project2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var package = await db.Packages.FirstOrDefaultAsync(p => p.TrackNumber.Equals(packageModel.TrackNumber));
+                var package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.TrackNumber.Equals(packageModel.TrackNumber));
                 if (package == null)
                 {
                     packageModel.LastDateOfUpdate = DateTime.Now;
-                    db.Packages.Add(packageModel);
-                    await db.SaveChangesAsync();
+                    entityRepository.SaveEntity(packageModel);
+                    await entityRepository.SaveChanges();
                     return RedirectToAction("Packages");
                 }
                 else
                     ModelState.AddModelError("", "Icorrect data");
             }
+
             return View(packageModel);
         }
 
@@ -134,7 +141,7 @@ namespace Project2.Controllers
             var workbook = new XSSFWorkbook();
             var excelSheet = workbook.CreateSheet("Packages");
             excelSheet.DefaultColumnWidth = 30;
-            var packages = await db.Packages.ToListAsync();
+            var packages = await entityRepository.Packages.ToListAsync();
 
             using (var fs = new FileStream(Path.Combine(webRootFolder, fileName), FileMode.Create, FileAccess.Write))
             {
@@ -161,11 +168,14 @@ namespace Project2.Controllers
                 }
                 workbook.Write(fs);
             }
+
             using (var stream = new FileStream(Path.Combine(webRootFolder, fileName), FileMode.Open))
             {
                 await stream.CopyToAsync(memory);
             }
+
             memory.Position = 0;
+
             return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
     }

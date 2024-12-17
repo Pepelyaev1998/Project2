@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Project2.Models;
+using Project2.Services;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -11,11 +12,11 @@ namespace Project2.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private DBContext db;
+        IEntityRepository entityRepository { get; set; }
 
-        public HomeController(ILogger<HomeController> logger, DBContext context)
+        public HomeController(IEntityRepository entityRepository)
         {
-            db = context;
+            this.entityRepository = entityRepository;
         }
 
         public IActionResult Support()
@@ -25,10 +26,10 @@ namespace Project2.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpDelete]
-        public void DeleteMessages()
+        public async Task DeleteMessages()
         {
-            db.Messages.RemoveRange(db.Messages);
-            db.SaveChanges();
+            await entityRepository.Messages.ForEachAsync(message => entityRepository.DeleteEntity(message));
+            await entityRepository.SaveChanges();
         }
 
     }

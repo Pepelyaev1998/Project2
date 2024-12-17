@@ -24,7 +24,7 @@ namespace Project2
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<DBContext>(options =>
+            services.AddDbContext<IEntityRepository, EntityRepository>(options =>
     options.UseSqlServer(connection));
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();

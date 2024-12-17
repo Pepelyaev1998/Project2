@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Project2.Models;
+using Project2.Services;
 using Project2.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,18 @@ namespace Project2.Controllers
 {
     public class AccountController : Controller
     {
-        private DBContext db;
+        //private DBContext db;
+        IEntityRepository entityRepository { get; set; }
         private readonly string error = "Incorrect login and/or password";
 
-        public AccountController(DBContext context)
+        //public AccountController(DBContext context)
+        //{
+        //    db = context;
+        //}
+
+        public AccountController(IEntityRepository entityRepository)
         {
-            db = context;
+            this.entityRepository = entityRepository;
         }
 
         [HttpGet]
@@ -35,12 +42,15 @@ namespace Project2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await db.Users
+                //var user = await db.Users
+                //     .Include(u => u.Role)
+                //     .FirstOrDefaultAsync(u => u.Email.Equals(model.Email) && u.Password.Equals(model.Password));
+                var user = await entityRepository.Users
                      .Include(u => u.Role)
                      .FirstOrDefaultAsync(u => u.Email.Equals(model.Email) && u.Password.Equals(model.Password));
                 if (user != null)
                 {
-                    await Authenticate(user); // аутентификация
+                    await Authenticate(user); 
 
                     return RedirectToAction("Packages", "Package");
                 }
@@ -60,7 +70,8 @@ namespace Project2.Controllers
         [HttpGet]
         public async Task<IActionResult> AccountManager(SortState sortOrder)
         {
-            var users = await db.Users.Include(u => u.Role).ToListAsync();
+            //var users = await db.Users.Include(u => u.Role).ToListAsync();
+            var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
             ViewData["Name"] = sortOrder == SortState.NameAsc ? SortState.NameDesc : SortState.NameAsc;
             users = sortOrder switch
             {
@@ -68,6 +79,7 @@ namespace Project2.Controllers
                 SortState.NameAsc => users.OrderBy(u => u.Email).ToList(),
                 _ => users.OrderBy(p => p.Id).ToList(),
             };
+
             return View(users);
         }
 
@@ -77,13 +89,14 @@ namespace Project2.Controllers
         {
             if (!string.IsNullOrEmpty(searchString))
             {
-                var users = db.Users.Include(u => u.Role).ToListAsync();
-                var filteredUsers = users.GetAwaiter().GetResult().
-                    FindAll(u => u.Email.ToUpper().Contains(searchString.ToUpper()));
-                return View(filteredUsers);
+                //var users = await db.Users.Include(u => u.Role).ToListAsync();
+                var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
+                users.FindAll(u => u.Email.ToUpper().Contains(searchString.ToUpper()));
+                return View(users);
             }
 
-            return View(await db.Users.Include(u => u.Role).ToListAsync());
+            //return View(await db.Users.Include(u => u.Role).ToListAsync());
+            return View(await entityRepository.Users.Include(u => u.Role).ToListAsync());
         }
 
         [Authorize(Roles = "admin")]
@@ -92,10 +105,12 @@ namespace Project2.Controllers
         {
             if (id != null)
             {
-                User user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+                //var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+                var user = await entityRepository.Users.FirstOrDefaultAsync(u => u.Id == id);
                 if (user != null)
                     return View(user);
             }
+
             return NotFound();
         }
 
@@ -105,8 +120,10 @@ namespace Project2.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Users.Update(user);
-                await db.SaveChangesAsync();
+                //db.Users.Update(user);
+                entityRepository.SaveEntity(user);
+                //await db.SaveChangesAsync();
+                await entityRepository.SaveChanges();
                 return RedirectToAction("AccountManager");
             }
 
@@ -119,14 +136,15 @@ namespace Project2.Controllers
         {
             if (id != null)
             {
-                User user = await db.Users.FirstOrDefaultAsync(p => p.Id == id);
+                var user = await entityRepository.Users.FirstOrDefaultAsync(p => p.Id == id);
                 if (user != null)
                 {
-                    db.Users.Remove(user);
-                    await db.SaveChangesAsync();
+                    entityRepository.DeleteEntity(user);
+                    await entityRepository.SaveChanges();
                     return Ok("success");
                 }
             }
+
             return BadRequest();
         }
 
@@ -137,18 +155,19 @@ namespace Project2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Email.Equals(model.Email));
+                var user = await entityRepository.Users.FirstOrDefaultAsync(u => u.Email.Equals(model.Email));
                 if (user == null)
                 {
-                    var userRole = await db.Roles.FirstOrDefaultAsync(r => r.Name.Equals("user"));
-                    db.Users.Add(new User { Email = model.Email, Password = model.Password, Role = userRole });
-                    await db.SaveChangesAsync();
+                    var userRole = await entityRepository.Roles.FirstOrDefaultAsync(r => r.Name.Equals("user"));
+                    entityRepository.SaveEntity(new User { Email = model.Email, Password = model.Password, Role = userRole });
+                    await entityRepository.SaveChanges();
                     //await Authenticate(user); // аутентификация
                     return RedirectToAction("AccountManager");
                 }
                 else
                     ModelState.AddModelError("", error);
             }
+
             return View(model);
         }
 

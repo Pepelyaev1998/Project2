@@ -1,6 +1,6 @@
 ﻿namespace Project2.Models
 {
-    public class Message
+    public class Message : Entity
     {
         public int Id { get; set; }
         public int FromUserId { get; set; }
