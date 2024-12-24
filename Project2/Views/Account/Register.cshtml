@@ -1,23 +1,26 @@
 ﻿@model Project2.ViewModels.RegisterModel
 
-<!DOCTYPE html>
-<html>
-<body class="bg-secondary">
-    <div class="row h-100 justify-content-center align-items-center jumbotron bg-secondary">
-        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = " p-4 justify-content-center align-items-center" }))
-        {
-            <div class="navbar navbar-inverse navbar-fixed-top">
-                <div class="container">
-                    <div class="navbar-header">
-                        <h4>Adding a new user</h4>
-                        <hr />
+<div class="modal fade" id="AddUserModal" tabindex="-1" role="dialog" aria-labelledby="AddUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form class="AddUser  p-4 justify-content-center align-items-center">
+                @using (Html.BeginForm())
+                {
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="AddUserModalLabel">Adding a new user</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
                         @Html.ValidationSummary(true)
                         <div class="form-group">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-envelope-at-fill"></i>
                                 </span>
-                                <input type="text" class="form-control" placeholder="Email" asp-for="Email">
+                                <input type="text" class="form-control userName" placeholder="Email" asp-for="Email" minlength="3" maxlength="20" required>
                                 @Html.ValidationMessageFor(u => u.Email)
                             </div>
 
@@ -27,7 +30,7 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-key-fill"></i>
                                 </span>
-                                <input type="password" class="form-control" placeholder="Password" asp-for="Password">
+                                <input type="password" class="form-control password" placeholder="Password" asp-for="Password" minlength="8" maxlength="20" required>
                                 @Html.ValidationMessageFor(u => u.Password)
                             </div>
                         </div>
@@ -36,24 +39,42 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-check"></i>
                                 </span>
-                                <input type="password" class="form-control" placeholder="Confirm password" asp-for="ConfirmPassword">
+                                <input type="password" class="form-control confirm-password" placeholder="Confirm password" asp-for="ConfirmPassword" minlength="8" maxlength="20" required>
                                 @Html.ValidationMessageFor(u => u.ConfirmPassword)
                             </div>
                         </div>
+
+                    </div>
+                    <div class="modal-footer">
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary ">
                                 Register <i class="bi bi-person-plus"></i>
                             </button>
-                            <button type="submit" class="btn btn-primary" asp-action="AccountManager" asp-controller="Account" formmethod="get">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                 Back <i class="bi bi-arrow-return-left"></i>
                             </button>
                         </div>
                     </div>
-                </div>
-            </div>
-        }
+                }
+            </form>
+        </div>
     </div>
+</div>
 
-
-</body>
-</html>
+<script>
+        $(".AddUser").submit(function(e) {
+                      e.preventDefault();
+                      $.ajax({
+                      type: "PUT",
+                      url: "@Url.Action("Register","Account")",
+                      data: $(this).serialize(),
+                      dataType: "html",
+                      success: function () {
+                          window.location = "@Url.Action("AccountManager","Account")";
+                      },
+                      error: function (xhr, status, error) {
+                          console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                      }
+                  });
+              });
+</script>

@@ -9,7 +9,7 @@
                 <button class="btn btn-outline-success" type="submit">Search <i class="bi bi-search"></i></button>
             </form>
         </div>
-        <button type="button" onclick="location.href='@Url.Action("Register","Account")'" class="btn btn-outline-dark mr-2">user<i class="bi bi-person-plus-fill"></i></button>
+        <button type="button" class="btn btn-outline-dark mr-2" data-toggle="modal" data-target="#AddUserModal">user<i class="bi bi-person-plus-fill"></i></button>
         <button type="button" onclick="location.href='@Url.Action("Packages","Package")'" class="btn btn-outline-dark mr-2">Back to packages<i class="bi bi-arrow-return-left"></i></button>
         <button type="button" onclick="location.href='@Url.Action("Logout","Account")'" class="btn btn-outline-dark">Exit <i class="bi bi-box-arrow-right"></i></button>
     </div>
@@ -39,6 +39,8 @@
         }
     }
 </table>
+
+@await Html.PartialAsync("Register", new Project2.ViewModels.RegisterModel())
 
 <script>
     $(".delete").click(function (e) {

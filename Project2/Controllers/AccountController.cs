@@ -149,8 +149,8 @@ namespace Project2.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPut]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterModel model)
         {
             if (ModelState.IsValid)
@@ -162,13 +162,13 @@ namespace Project2.Controllers
                     entityRepository.SaveEntity(new User { Email = model.Email, Password = model.Password, Role = userRole });
                     await entityRepository.SaveChanges();
                     //await Authenticate(user); // аутентификация
-                    return RedirectToAction("AccountManager");
+                    return Ok();
                 }
                 else
                     ModelState.AddModelError("", error);
             }
 
-            return View(model);
+            return BadRequest();
         }
 
         private async Task Authenticate(User user)
