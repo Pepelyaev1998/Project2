@@ -9,37 +9,12 @@
                 <button class="btn btn-outline-success" type="submit">Search <i class="bi bi-search"></i></button>
             </form>
         </div>
-        <button type="button" class="btn btn-outline-dark mr-2" data-toggle="modal" data-target="#AddUserModal">user<i class="bi bi-person-plus-fill"></i></button>
+        <button type="button" class="btn btn-outline-dark mr-2 addUserModal" data-toggle="modal" data-target="#AddUserModal">user<i class="bi bi-person-plus-fill"></i></button>
         <button type="button" onclick="location.href='@Url.Action("Packages","Package")'" class="btn btn-outline-dark mr-2">Back to packages<i class="bi bi-arrow-return-left"></i></button>
         <button type="button" onclick="location.href='@Url.Action("Logout","Account")'" class="btn btn-outline-dark">Exit <i class="bi bi-box-arrow-right"></i></button>
     </div>
 </nav>
-<table class="table table-striped table-hover">
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">
-            <a asp-action="AccountManager" asp-route-sortOrder="@ViewBag.Name">
-                User Email <i class="bi bi-funnel-fill"></i>
-            </a>
-        </th>
-        <th scope="col">Action</th>
-    </tr>
-    @foreach (var item in Model)
-    {
-        @if (!item.Role.Name.Equals("admin"))
-        {
-            <tr>
-                <th scope="row">@item.Id</th>
-                <td>@item.Email</td>
-                <td>
-                    <a asp-action="EditUser" asp-controller="Account" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
-                    <a href="#" class="delete">Delete <i class="bi bi-trash-fill"></i></a>
-                </td>
-            </tr>
-        }
-    }
-</table>
-
+@await Html.PartialAsync("AccountTable", @Model)
 @await Html.PartialAsync("Register", new Project2.ViewModels.RegisterModel())
 
 <script>
@@ -54,7 +29,10 @@
                   dataType: "text",
                   success: function (result) {
                    if (result == "success")
+                   {
                        parent.hide();
+                       toastr.success('User deleted');
+                   }
                    else
                        alert(result);
                   },
@@ -63,4 +41,41 @@
                   }
               });
           });
+
+           $(".AddUser").submit(function(e) {
+                  e.preventDefault();
+                  var email = $('.userName').val();
+        var password = $('.userPassword').val();
+        var confirmPassword = $('.userConfirmPassword').val();
+
+        if(email.length != 0 && password.length != 0 && confirmPassword.length != 0 && password === confirmPassword) {
+                  $.ajax({
+                  type: "PUT",
+                  url: "@Url.Action("Register","Account")",
+                  data: $(this).serialize(),
+                  dataType: "html",
+                  success: function (result) {
+                   if (result == "success")
+                   {
+                        $('.AccountTable').load("@Url.Action("AccountTable","Account")");
+                        $('.modal').modal('hide');
+                        toastr.success('User added');
+                   }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error('The user exists or incorrect data was entered');
+                       $('.modal').modal('hide');
+                      console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText);
+                  }
+              });
+              }
+              else{
+              toastr.warning("Passwords don't match");
+              }
+          });
+
+          $(".addUserModal").click(function(e) {
+                  $(".AddUser")[0].reset();
+           });
+
 </script>

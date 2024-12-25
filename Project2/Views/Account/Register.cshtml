@@ -4,77 +4,51 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form class="AddUser  p-4 justify-content-center align-items-center">
-                @using (Html.BeginForm())
-                {
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="AddUserModalLabel">Adding a new user</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="AddUserModalLabel">Adding a new user</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-envelope-at-fill"></i>
+                            </span>
+                            <input type="email" class="form-control userName" placeholder="exemple@mail.com" asp-for="Email" minlength="3" maxlength="20" required>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-key-fill"></i>
+                            </span>
+                            <input type="password" class="form-control password userPassword" placeholder="Password" asp-for="Password" minlength="8" maxlength="20" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-check"></i>
+                            </span>
+                            <input type="password" class="form-control confirm-password userConfirmPassword" placeholder="Confirm password" asp-for="ConfirmPassword" minlength="8" maxlength="20" required>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            Register <i class="bi bi-person-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            Back <i class="bi bi-arrow-return-left"></i>
                         </button>
                     </div>
-                    <div class="modal-body">
-
-                        @Html.ValidationSummary(true)
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-envelope-at-fill"></i>
-                                </span>
-                                <input type="text" class="form-control userName" placeholder="Email" asp-for="Email" minlength="3" maxlength="20" required>
-                                @Html.ValidationMessageFor(u => u.Email)
-                            </div>
-
-                        </div>
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-key-fill"></i>
-                                </span>
-                                <input type="password" class="form-control password" placeholder="Password" asp-for="Password" minlength="8" maxlength="20" required>
-                                @Html.ValidationMessageFor(u => u.Password)
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-check"></i>
-                                </span>
-                                <input type="password" class="form-control confirm-password" placeholder="Confirm password" asp-for="ConfirmPassword" minlength="8" maxlength="20" required>
-                                @Html.ValidationMessageFor(u => u.ConfirmPassword)
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary ">
-                                Register <i class="bi bi-person-plus"></i>
-                            </button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                Back <i class="bi bi-arrow-return-left"></i>
-                            </button>
-                        </div>
-                    </div>
-                }
+                </div>
             </form>
         </div>
     </div>
 </div>
-
-<script>
-        $(".AddUser").submit(function(e) {
-                      e.preventDefault();
-                      $.ajax({
-                      type: "PUT",
-                      url: "@Url.Action("Register","Account")",
-                      data: $(this).serialize(),
-                      dataType: "html",
-                      success: function () {
-                          window.location = "@Url.Action("AccountManager","Account")";
-                      },
-                      error: function (xhr, status, error) {
-                          console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
-                      }
-                  });
-              });
-</script>

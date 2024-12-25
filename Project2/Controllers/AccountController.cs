@@ -50,7 +50,7 @@ namespace Project2.Controllers
                      .FirstOrDefaultAsync(u => u.Email.Equals(model.Email) && u.Password.Equals(model.Password));
                 if (user != null)
                 {
-                    await Authenticate(user); 
+                    await Authenticate(user);
 
                     return RedirectToAction("Packages", "Package");
                 }
@@ -84,6 +84,23 @@ namespace Project2.Controllers
         }
 
         [Authorize(Roles = "admin")]
+        [HttpGet]
+        public async Task<IActionResult> AccountTable(SortState sortOrder)
+        {
+            //var users = await db.Users.Include(u => u.Role).ToListAsync();
+            var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
+            ViewData["Name"] = sortOrder == SortState.NameAsc ? SortState.NameDesc : SortState.NameAsc;
+            users = sortOrder switch
+            {
+                SortState.NameDesc => users.OrderByDescending(u => u.Email).ToList(),
+                SortState.NameAsc => users.OrderBy(u => u.Email).ToList(),
+                _ => users.OrderBy(p => p.Id).ToList(),
+            };
+
+            return PartialView(users);
+        }
+
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<IActionResult> AccountManager(string searchString)
         {
@@ -91,7 +108,7 @@ namespace Project2.Controllers
             {
                 //var users = await db.Users.Include(u => u.Role).ToListAsync();
                 var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
-                users.FindAll(u => u.Email.ToUpper().Contains(searchString.ToUpper()));
+                users = users.FindAll(u => u.Email.ToUpper().Contains(searchString.ToUpper()));
                 return View(users);
             }
 
@@ -162,11 +179,11 @@ namespace Project2.Controllers
                     entityRepository.SaveEntity(new User { Email = model.Email, Password = model.Password, Role = userRole });
                     await entityRepository.SaveChanges();
                     //await Authenticate(user); // аутентификация
-                    return Ok();
+                    return Ok("success");
                 }
-                else
-                    ModelState.AddModelError("", error);
             }
+
+            ModelState.AddModelError("", error);
 
             return BadRequest();
         }

@@ -78,7 +78,10 @@
                   dataType: "text",
                   success: function (result) {
                    if (result == "success")
+                   {
                        parent.hide();
+                       toastr.success('Package deleted');
+                   }
                    else
                        alert(result);
                   },
