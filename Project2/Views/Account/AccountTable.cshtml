@@ -18,7 +18,7 @@
                 <td>@item.Email</td>
                 <td>
                     <a asp-action="EditUser" asp-controller="Account" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
-                    <a href="#" class="delete">Delete <i class="bi bi-trash-fill"></i></a>
+                    <a href="#" onclick="deleteAccount(this)">Delete <i class="bi bi-trash-fill"></i></a>
                 </td>
             </tr>
         }
