@@ -18,7 +18,7 @@
         <div class="float-right">
             @if (isAdmin)
             {
-                <button type="button" onclick="location.href='@Url.Action("AddPackage","Package")'" class="btn btn-outline-dark mr-2">Add Package  <i class="bi bi-plus"></i><i class="bi bi-box-seam"></i></button>
+                <button type="button" class="btn btn-outline-dark mr-2 addPackageModal" data-toggle="modal" data-target="#AddPackageModal">Add Package  <i class="bi bi-plus"></i><i class="bi bi-box-seam"></i></button>
                 <button type="button" onclick="location.href='@Url.Action("ExportToFile","Package")'" class="btn btn-outline-dark mr-2">Packages  <i class="bi bi-download"></i></button>
                 <button type="button" onclick="location.href='@Url.Action("AccountManager","Account")'" class="btn btn-outline-dark mr-2">Users <i class="bi bi-people-fill"></i></button>
             }
@@ -27,48 +27,50 @@
         </div>
     </div>
 </nav>
-<table class="table table-striped table-hover">
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">Track Number</th>
-        <th scope="col">Starting Point</th>
-        <th scope="col">End Point</th>
-        <th scope="col">Last Location</th>
-        <th scope="col">Current State</th>
-        <th scope="col">
-            <a asp-action="Packages" asp-route-sortOrder="@ViewBag.LastDateOfUpdate">
-                Last Date Of Update <i class="bi bi-funnel-fill"></i>
-            </a>
-        </th>
-        @if (isAdmin)
-        {
-            <th scope="col">Action</th>
-        }
-    </tr>
-    @foreach (var item in Model)
-    {
-        <tr>
-            <th scope="row">@item.Id</th>
-            <td>@item.TrackNumber</td>
-            <td>@item.StartingPoint</td>
-            <td>@item.EndPoint</td>
-            <td>@item.LastLocation</td>
-            <td>@item.CurrentState</td>
-            <td>@item.LastDateOfUpdate</td>
-            @if (isAdmin)
-            {
-                <td>
-                    <a asp-action="EditPackage" asp-controller="Package" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
-                    <a href="#" class="delete">Delete <i class="bi bi-trash-fill"></i></a>
-                </td>
-            }
-        </tr>
-    }
-</table>
+@await Html.PartialAsync("PackageTable", @Model)
+@await Html.PartialAsync("AddPackage", new Project2.Models.Package())
 
 <script>
-    $(".delete").click(function (e) {
-              var parent = $(this).parents("tr");
+    $(".AddPackage").submit(function(e) {
+                  e.preventDefault();
+                  var trackNumber = $('.track-number').val();
+                  var startPoint = $('.start-point').val();
+                  var endPoint = $('.end-point').val();
+                  var lastLocation = $('.last-location').val();
+                  var currentState = $('.current-state').val();
+   
+        if(trackNumber.length != 0 && startPoint.length != 0 && endPoint.length != 0 && lastLocation.length != 0 && currentState.length != 0) {
+                  $.ajax({
+                  type: "PUT",
+                  url: "@Url.Action("AddPackage","Package")",
+                  data: $(this).serialize(),
+                  dataType: "html",
+                  success: function (result) {
+                   if (result == "success")
+                   {
+                        $('.package-table').load("@Url.Action("PackageTable","Package")");
+                        $('.modal').modal('hide');
+                        toastr.success('Package added');
+                   }
+                  },
+                  error: function (xhr, status, error) {
+                      toastr.error('The package exists or incorrect data was entered');
+                       $('.modal').modal('hide');
+                      console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText);
+                  }
+              });
+              }
+              else{
+              toastr.warning("invalid data!");
+              }
+          });
+
+          $(".addPackageModal").click(function(e) {
+                  $(".AddPackage")[0].reset();
+           });
+
+    function deletePackage(el){
+              var parent = $(el).parents("tr");
               var id = parent.find("th:eq(0)").text();
 
                   $.ajax({
@@ -89,6 +91,6 @@
                       console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
                   }
               });
-          });
+          };
 </script>
 

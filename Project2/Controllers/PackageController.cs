@@ -39,6 +39,22 @@ namespace Project2.Controllers
             return View(packages);
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpGet]
+        public async Task<IActionResult> PackageTable(SortState sortOrder)
+        {
+            var packages = await entityRepository.Packages.ToListAsync();
+            ViewData["LastDateOfUpdate"] = sortOrder == SortState.LastDateOfUpdateAsc ? SortState.LastDateOfUpdateDesc : SortState.LastDateOfUpdateAsc;
+            packages = sortOrder switch
+            {
+                SortState.LastDateOfUpdateDesc => packages.OrderByDescending(p => p.LastDateOfUpdate).ToList(),
+                SortState.LastDateOfUpdateAsc => packages.OrderBy(p => p.LastDateOfUpdate).ToList(),
+                _ => packages.OrderBy(p => p.TrackNumber).ToList(),
+            };
+
+            return PartialView(packages);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Packages(string searchString)
         {
@@ -103,15 +119,7 @@ namespace Project2.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        [HttpGet]
-        public IActionResult AddPackage()
-        {
-            return View();
-        }
-
-        [Authorize(Roles = "admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPut]
         public async Task<IActionResult> AddPackage(Package packageModel)
         {
             if (ModelState.IsValid)
@@ -122,13 +130,13 @@ namespace Project2.Controllers
                     packageModel.LastDateOfUpdate = DateTime.Now;
                     entityRepository.SaveEntity(packageModel);
                     await entityRepository.SaveChanges();
-                    return RedirectToAction("Packages");
+                    return Ok("success");
                 }
-                else
-                    ModelState.AddModelError("", "Icorrect data");
             }
 
-            return View(packageModel);
+            ModelState.AddModelError("", "Icorrect data");
+
+            return BadRequest();
         }
 
         [Authorize(Roles = "admin")]
