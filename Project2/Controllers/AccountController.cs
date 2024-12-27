@@ -19,15 +19,17 @@ namespace Project2.Controllers
         //private DBContext db;
         IEntityRepository entityRepository { get; set; }
         private readonly string error = "Incorrect login and/or password";
+        private readonly EmailService emailService;
 
         //public AccountController(DBContext context)
         //{
         //    db = context;
         //}
 
-        public AccountController(IEntityRepository entityRepository)
+        public AccountController(IEntityRepository entityRepository, EmailService emailService)
         {
             this.entityRepository = entityRepository;
+            this.emailService = emailService;
         }
 
         [HttpGet]
@@ -178,7 +180,9 @@ namespace Project2.Controllers
                     var userRole = await entityRepository.Roles.FirstOrDefaultAsync(r => r.Name.Equals("user"));
                     entityRepository.SaveEntity(new User { Email = model.Email, Password = model.Password, Role = userRole });
                     await entityRepository.SaveChanges();
+                    //await emailService.SendEmailAsync(model.Email, model.Password);
                     //await Authenticate(user); // аутентификация
+
                     return Ok("success");
                 }
             }

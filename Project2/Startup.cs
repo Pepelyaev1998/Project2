@@ -36,6 +36,7 @@ namespace Project2
                 });
             services.AddSignalR();
             services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+            services.AddTransient<EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
