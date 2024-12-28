@@ -4,40 +4,38 @@
     var isAdmin = User.FindFirst(x => x.Type.Equals(ClaimsIdentity.DefaultRoleClaimType)).Value.Equals("admin");
 }
 <table class="table table-striped table-hover package-table">
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">Track Number</th>
-        <th scope="col">Starting Point</th>
-        <th scope="col">End Point</th>
-        <th scope="col">Last Location</th>
-        <th scope="col">Current State</th>
-        <th scope="col">
-            <a asp-action="Packages" asp-route-sortOrder="@ViewBag.LastDateOfUpdate">
-                Last Date Of Update <i class="bi bi-funnel-fill"></i>
-            </a>
-        </th>
-        @if (isAdmin)
-        {
-            <th scope="col">Action</th>
-        }
-    </tr>
-    @foreach (var item in Model)
-    {
+    <thead class="table-thead">
         <tr>
-            <th scope="row">@item.Id</th>
-            <td>@item.TrackNumber</td>
-            <td>@item.StartingPoint</td>
-            <td>@item.EndPoint</td>
-            <td>@item.LastLocation</td>
-            <td>@item.CurrentState</td>
-            <td>@item.LastDateOfUpdate</td>
+            <th scope="col">#</th>
+            <th scope="col" onclick="sortTable(this)">Track Number<i class="bi bi-funnel-fill"></i></th>
+            <th scope="col" onclick="sortTable(this)">Starting Point<i class="bi bi-funnel-fill"></i></th>
+            <th scope="col" onclick="sortTable(this)">End Point<i class="bi bi-funnel-fill"></i></th>
+            <th scope="col" onclick="sortTable(this)">Last Location<i class="bi bi-funnel-fill"></i></th>
+            <th scope="col" onclick="sortTable(this)">Current State<i class="bi bi-funnel-fill"></i></th>
+            <th scope="col" onclick="sortTable(this)">Last Date Of Update <i class="bi bi-funnel-fill"></i></th>
             @if (isAdmin)
             {
-                <td>
-                    <a asp-action="EditPackage" asp-controller="Package" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
-                    <a href="#" onclick="deletePackage(this)">Delete <i class="bi bi-trash-fill"></i></a>
-                </td>
+                <th scope="col">Action</th>
             }
         </tr>
-    }
+    </thead>
+            @foreach (var item in Model)
+            {
+            <tr>
+                <th scope="row">@item.Id</th>
+                <td>@item.TrackNumber</td>
+                <td>@item.StartingPoint</td>
+                <td>@item.EndPoint</td>
+                <td>@item.LastLocation</td>
+                <td>@item.CurrentState</td>
+                <td>@item.LastDateOfUpdate</td>
+                    @if (isAdmin)
+                    {
+                    <td>
+                        <a asp-action="EditPackage" asp-controller="Package" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
+                        <a href="#" onclick="deletePackage(this)">Delete <i class="bi bi-trash-fill"></i></a>
+                    </td>
+                    }
+            </tr>
+            }
 </table>

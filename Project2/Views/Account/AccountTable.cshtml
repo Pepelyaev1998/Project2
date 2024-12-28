@@ -1,14 +1,14 @@
 ﻿@model IEnumerable<Project2.Models.User>
 <table class="AccountTable table table-striped table-hover">
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">
-            <a asp-action="AccountManager" asp-route-sortOrder="@ViewBag.Name">
+    <thead class="table-thead">
+        <tr>
+            <th scope="col">#</th>
+            <th onclick="sortTable(this)" scope="col">
                 User Email <i class="bi bi-funnel-fill"></i>
-            </a>
-        </th>
-        <th scope="col">Action</th>
-    </tr>
+            </th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
     @foreach (var item in Model)
     {
         @if (!item.Role.Name.Equals("admin"))

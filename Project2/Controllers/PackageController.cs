@@ -22,51 +22,24 @@ namespace Project2.Controllers
         {
             this.entityRepository = entityRepository;
             this.hostingEnvironment = hostingEnvironment;
+
         }
 
         [HttpGet]
-        public async Task<IActionResult> Packages(SortState sortOrder)
+        public async Task<IActionResult> Packages()
         {
             var packages = await entityRepository.Packages.ToListAsync();
-            ViewData["LastDateOfUpdate"] = sortOrder == SortState.LastDateOfUpdateAsc ? SortState.LastDateOfUpdateDesc : SortState.LastDateOfUpdateAsc;
-            packages = sortOrder switch
-            {
-                SortState.LastDateOfUpdateDesc => packages.OrderByDescending(p => p.LastDateOfUpdate).ToList(),
-                SortState.LastDateOfUpdateAsc => packages.OrderBy(p => p.LastDateOfUpdate).ToList(),
-                _ => packages.OrderBy(p => p.TrackNumber).ToList(),
-            };
 
             return View(packages);
         }
 
         [Authorize(Roles = "admin")]
         [HttpGet]
-        public async Task<IActionResult> PackageTable(SortState sortOrder)
+        public async Task<IActionResult> PackageTable()
         {
             var packages = await entityRepository.Packages.ToListAsync();
-            ViewData["LastDateOfUpdate"] = sortOrder == SortState.LastDateOfUpdateAsc ? SortState.LastDateOfUpdateDesc : SortState.LastDateOfUpdateAsc;
-            packages = sortOrder switch
-            {
-                SortState.LastDateOfUpdateDesc => packages.OrderByDescending(p => p.LastDateOfUpdate).ToList(),
-                SortState.LastDateOfUpdateAsc => packages.OrderBy(p => p.LastDateOfUpdate).ToList(),
-                _ => packages.OrderBy(p => p.TrackNumber).ToList(),
-            };
 
             return PartialView(packages);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Packages(string searchString)
-        {
-            var packages = await entityRepository.Packages.ToListAsync();
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                packages = packages.
-                    FindAll(p => p.TrackNumber.ToUpper().Contains(searchString.ToUpper()));
-            }
-
-            return View(packages);
         }
 
         [Authorize(Roles = "admin")]
@@ -94,7 +67,7 @@ namespace Project2.Controllers
                 entityRepository.SaveEntity(package);
                 await entityRepository.SaveChanges();
 
-                return RedirectToAction("Package");
+                return RedirectToAction("Packages");
             }
 
             return View(package);

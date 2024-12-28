@@ -10,10 +10,7 @@
         <a class="navbar-brand" href="#">Packages <i class="bi bi-boxes"></i></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation"></button>
         <div class="navbar-collapse" id="navbarScroll">
-            <form class="d-flex" asp-action="Packages" asp-controller="Package" method="post">
-                <input class="form-control me-2" name="searchString" type="search" placeholder="Search track number" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search <i class="bi bi-search"></i></button>
-            </form>
+            <input id="search" class="form-control me-2" name="searchString" type="search" placeholder="Search track number" aria-label="Search">
         </div>
         <div class="float-right">
             @if (isAdmin)
@@ -31,66 +28,159 @@
 @await Html.PartialAsync("AddPackage", new Project2.Models.Package())
 
 <script>
-    $(".AddPackage").submit(function(e) {
-                  e.preventDefault();
-                  var trackNumber = $('.track-number').val();
-                  var startPoint = $('.start-point').val();
-                  var endPoint = $('.end-point').val();
-                  var lastLocation = $('.last-location').val();
-                  var currentState = $('.current-state').val();
-   
-        if(trackNumber.length != 0 && startPoint.length != 0 && endPoint.length != 0 && lastLocation.length != 0 && currentState.length != 0) {
-                  $.ajax({
-                  type: "PUT",
-                  url: "@Url.Action("AddPackage","Package")",
-                  data: $(this).serialize(),
-                  dataType: "html",
-                  success: function (result) {
-                   if (result == "success")
-                   {
-                        $('.package-table').load("@Url.Action("PackageTable","Package")");
-                        $('.modal').modal('hide');
-                        toastr.success('Package added');
-                   }
-                  },
-                  error: function (xhr, status, error) {
-                      toastr.error('The package exists or incorrect data was entered');
-                       $('.modal').modal('hide');
-                      console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText);
-                  }
+       $(".AddPackage").submit(function(e) {
+                     e.preventDefault();
+                     var trackNumber = $('.track-number').val();
+                     var startPoint = $('.start-point').val();
+                     var endPoint = $('.end-point').val();
+                     var lastLocation = $('.last-location').val();
+                     var currentState = $('.current-state').val();
+
+           if(trackNumber.length != 0 && startPoint.length != 0 && endPoint.length != 0 && lastLocation.length != 0 && currentState.length != 0) {
+                     $.ajax({
+                     type: "PUT",
+                     url: "@Url.Action("AddPackage","Package")",
+                     data: $(this).serialize(),
+                     dataType: "html",
+                     success: function (result) {
+                      if (result == "success")
+                      {
+                           $('.package-table').load("@Url.Action("PackageTable","Package")");
+                           $('.modal').modal('hide');
+                           toastr.success('Package added');
+                      }
+                     },
+                     error: function (xhr, status, error) {
+                         toastr.error('The package exists or incorrect data was entered');
+                          $('.modal').modal('hide');
+                         console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText);
+                     }
+                 });
+                 }
+                 else{
+                 toastr.warning("invalid data!");
+                 }
+             });
+
+             $(".addPackageModal").click(function(e) {
+                     $(".AddPackage")[0].reset();
               });
-              }
-              else{
-              toastr.warning("invalid data!");
-              }
-          });
 
-          $(".addPackageModal").click(function(e) {
-                  $(".AddPackage")[0].reset();
-           });
+       function deletePackage(el){
+                 var parent = $(el).parents("tr");
+                 var id = parent.find("th:eq(0)").text();
 
-    function deletePackage(el){
-              var parent = $(el).parents("tr");
-              var id = parent.find("th:eq(0)").text();
+                     $.ajax({
+                     type: "DELETE",
+                     url: "@Url.Action("DeletePackage","Package")",
+                     data: { id: id },
+                     dataType: "text",
+                     success: function (result) {
+                      if (result == "success")
+                      {
+                          parent.hide();
+                          toastr.success('Package deleted');
+                      }
+                      else
+                          alert(result);
+                     },
+                     error: function (xhr, status, error) {
+                         console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                     }
+                 });
+             };
 
-                  $.ajax({
-                  type: "DELETE",
-                  url: "@Url.Action("DeletePackage","Package")",
-                  data: { id: id },
-                  dataType: "text",
-                  success: function (result) {
-                   if (result == "success")
-                   {
-                       parent.hide();
-                       toastr.success('Package deleted');
+       //     $(document).ready(function () {
+       //    $('.table').after('<nav aria-label="Page navigation example"><ul class="pagination justify-content-end"></ul></nav>');
+       //    var rowsTotal = $('.table tbody tr').length;
+       //    var countRows = ($(window).height() - $('.table-thead').height() - $('head').height() - $('.navbar').height()) / $('.table tbody tr:first').height();
+       //    var rowsShown = $('.table').height() < $(window).height() ? rowsTotal : countRows;
+       //    var numPages = rowsTotal / rowsShown;
+       //    for (i = 0; i < numPages; i++) {
+       //        var pageNum = i + 1;
+       //        $('.pagination').append('<li class="page-item"><a class="page-link" href="#" rel="' + i + '">' + pageNum + '</a></li> ');
+       //    }
+       //    $('.table tbody tr').hide();
+       //    $('.table tbody tr').slice(0, rowsShown).show();
+       //    $('.pagination a:first').addClass('font-weight-bold');
+       //    $('.pagination a').bind('click', function () {
+       //        $('.pagination a').removeClass('font-weight-bold');
+       //        $(this).addClass('font-weight-bold');
+       //        var currPage = $(this).attr('rel');
+       //        var startItem = currPage * rowsShown;
+       //        var endItem = startItem + rowsShown;
+       //        $('.table tbody tr').css('opacity', '0.0').hide().slice(startItem, endItem).
+       //            css('display', 'table-row').animate({ opacity: 1 }, 300);
+       //    });
+       //});
+
+        $('#search').on('keyup', function () {
+           tableSearch();
+       });
+
+       function tableSearch() {
+           var table = document.querySelector('.table');
+           var flag = false;
+           for (var i = 1; i < table.rows.length; i++) {
+               flag = false;
+               for (var j = table.rows[i].cells.length - 2; j > 0; j--) {
+                   flag = table.rows[i].cells[j].innerHTML.toLowerCase().startsWith($("#search").val().toLowerCase());
+                   if (flag) {
+                       break;
                    }
-                   else
-                       alert(result);
-                  },
-                  error: function (xhr, status, error) {
-                      console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
-                  }
-              });
-          };
+               }
+
+               if (flag) {
+                   table.rows[i].style.display = "";
+               }
+               else {
+                   table.rows[i].style.display = "none";
+               }
+           }
+       }
+
+    function sortTable(column) {
+           var table, rows, switching, i, x, y, shouldSwitch, dir, numberOfColumn, switchcount = 0;
+
+               numberOfColumn = column.cellIndex-1;
+
+           table = document.querySelector('.table');
+           switching = true;
+           dir = "asc";
+           while (switching) {
+               switching = false;
+               rows = table.rows;
+               for (i = 1; i < (rows.length - 1); i++) {
+                   shouldSwitch = false;
+
+                       x = rows[i].getElementsByTagName("TD")[numberOfColumn];
+                       y = rows[i + 1].getElementsByTagName("TD")[numberOfColumn];
+                       if (dir == "asc") {
+                           if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                               shouldSwitch = true;
+                               break;
+                           }
+                       }
+                       else if (dir == "desc") {
+                           if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                               shouldSwitch = true;
+                               break;
+                           }
+                       }
+               }
+
+               if (shouldSwitch) {
+                   rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                   switching = true;
+                   switchcount++;
+               }
+               else {
+                   if (switchcount == 0 && dir == "asc") {
+                       dir = "desc";
+                       switching = true;
+                   }
+               }
+           }
+       }
 </script>
 

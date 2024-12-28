@@ -70,52 +70,22 @@ namespace Project2.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpGet]
-        public async Task<IActionResult> AccountManager(SortState sortOrder)
+        public async Task<IActionResult> AccountManager()
         {
             //var users = await db.Users.Include(u => u.Role).ToListAsync();
             var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
-            ViewData["Name"] = sortOrder == SortState.NameAsc ? SortState.NameDesc : SortState.NameAsc;
-            users = sortOrder switch
-            {
-                SortState.NameDesc => users.OrderByDescending(u => u.Email).ToList(),
-                SortState.NameAsc => users.OrderBy(u => u.Email).ToList(),
-                _ => users.OrderBy(p => p.Id).ToList(),
-            };
 
             return View(users);
         }
 
         [Authorize(Roles = "admin")]
         [HttpGet]
-        public async Task<IActionResult> AccountTable(SortState sortOrder)
+        public async Task<IActionResult> AccountTable()
         {
             //var users = await db.Users.Include(u => u.Role).ToListAsync();
             var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
-            ViewData["Name"] = sortOrder == SortState.NameAsc ? SortState.NameDesc : SortState.NameAsc;
-            users = sortOrder switch
-            {
-                SortState.NameDesc => users.OrderByDescending(u => u.Email).ToList(),
-                SortState.NameAsc => users.OrderBy(u => u.Email).ToList(),
-                _ => users.OrderBy(p => p.Id).ToList(),
-            };
 
             return PartialView(users);
-        }
-
-        [Authorize(Roles = "admin")]
-        [HttpPost]
-        public async Task<IActionResult> AccountManager(string searchString)
-        {
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                //var users = await db.Users.Include(u => u.Role).ToListAsync();
-                var users = await entityRepository.Users.Include(u => u.Role).ToListAsync();
-                users = users.FindAll(u => u.Email.ToUpper().Contains(searchString.ToUpper()));
-                return View(users);
-            }
-
-            //return View(await db.Users.Include(u => u.Role).ToListAsync());
-            return View(await entityRepository.Users.Include(u => u.Role).ToListAsync());
         }
 
         [Authorize(Roles = "admin")]
@@ -139,6 +109,8 @@ namespace Project2.Controllers
         {
             if (ModelState.IsValid)
             {
+                var userRole = await entityRepository.Roles.FirstOrDefaultAsync(r => r.Name.Equals("user"));
+                user.Role = userRole;
                 //db.Users.Update(user);
                 entityRepository.SaveEntity(user);
                 //await db.SaveChangesAsync();
