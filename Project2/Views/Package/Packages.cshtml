@@ -45,7 +45,12 @@
                      success: function (result) {
                       if (result == "success")
                       {
-                           $('.package-table').load("@Url.Action("PackageTable","Package")");
+                           $('.package-table').load("@Url.Action("PackageTable","Package")", function(responseTxt, statusTxt, xhr){
+                               if(statusTxt == "success")
+                                displayTable(currentPage);
+                               if(statusTxt == "error")
+                               alert("Error: " + xhr.status + ": " + xhr.statusText);
+                                });
                            $('.modal').modal('hide');
                            toastr.success('Package added');
                       }
@@ -90,32 +95,14 @@
                  });
              };
 
-       //     $(document).ready(function () {
-       //    $('.table').after('<nav aria-label="Page navigation example"><ul class="pagination justify-content-end"></ul></nav>');
-       //    var rowsTotal = $('.table tbody tr').length;
-       //    var countRows = ($(window).height() - $('.table-thead').height() - $('head').height() - $('.navbar').height()) / $('.table tbody tr:first').height();
-       //    var rowsShown = $('.table').height() < $(window).height() ? rowsTotal : countRows;
-       //    var numPages = rowsTotal / rowsShown;
-       //    for (i = 0; i < numPages; i++) {
-       //        var pageNum = i + 1;
-       //        $('.pagination').append('<li class="page-item"><a class="page-link" href="#" rel="' + i + '">' + pageNum + '</a></li> ');
-       //    }
-       //    $('.table tbody tr').hide();
-       //    $('.table tbody tr').slice(0, rowsShown).show();
-       //    $('.pagination a:first').addClass('font-weight-bold');
-       //    $('.pagination a').bind('click', function () {
-       //        $('.pagination a').removeClass('font-weight-bold');
-       //        $(this).addClass('font-weight-bold');
-       //        var currPage = $(this).attr('rel');
-       //        var startItem = currPage * rowsShown;
-       //        var endItem = startItem + rowsShown;
-       //        $('.table tbody tr').css('opacity', '0.0').hide().slice(startItem, endItem).
-       //            css('display', 'table-row').animate({ opacity: 1 }, 300);
-       //    });
-       //});
-
         $('#search').on('keyup', function () {
-           tableSearch();
+           if($("#search").val()=='' || $("#search").val()=="undefined" || $("#search").val()==null)
+             {
+             displayTable(currentPage);
+             }
+             else{
+            tableSearch();
+             }
        });
 
        function tableSearch() {
@@ -181,6 +168,42 @@
                    }
                }
            }
+            displayTable(currentPage);
        }
+
+        var rowsTotal = $('.table tbody tr').length;
+    var countRows = Math.floor(($(window).height() - $('.table-thead').height() - $('.navbar').height()) / $('.table tbody tr:first').height());
+    var rowsShown = $('.table').height() < $(window).height() ? rowsTotal : countRows;
+    const rowsPerPage = $('.table').height() < $(window).height() ? rowsTotal : countRows;
+    let currentPage = 1;
+
+    function displayTable(page) {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const rows = Array.from(document.querySelectorAll('.table tbody tr'));
+        rows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? '' : 'none';
+        });
+    }
+
+    function setupPagination() {
+        const rows = Array.from(document.querySelectorAll('.table tbody tr'));
+        const pageCount = Math.ceil(rows.length / rowsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        for (let i = 1; i <= pageCount; i++) {
+            const button = document.createElement('button');
+            button.innerText = i;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                displayTable(currentPage);
+            });
+            pagination.appendChild(button);
+        }
+    }
+
+    displayTable(currentPage);
+    setupPagination();
 </script>
 

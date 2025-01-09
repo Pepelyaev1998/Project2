@@ -19,8 +19,9 @@
             }
         </tr>
     </thead>
-            @foreach (var item in Model)
-            {
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
                 <th scope="row">@item.Id</th>
                 <td>@item.TrackNumber</td>
@@ -29,13 +30,15 @@
                 <td>@item.LastLocation</td>
                 <td>@item.CurrentState</td>
                 <td>@item.LastDateOfUpdate</td>
-                    @if (isAdmin)
-                    {
+                @if (isAdmin)
+                {
                     <td>
                         <a asp-action="EditPackage" asp-controller="Package" asp-route-id="@item.Id">Edit <i class="bi bi-pencil-square"></i></a> |
                         <a href="#" onclick="deletePackage(this)">Delete <i class="bi bi-trash-fill"></i></a>
                     </td>
-                    }
+                }
             </tr>
-            }
+        }
+    </tbody>
 </table>
+<div class="pagination" id="pagination"></div>

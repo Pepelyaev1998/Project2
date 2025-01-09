@@ -15,156 +15,180 @@
 @await Html.PartialAsync("Register", new Project2.ViewModels.RegisterModel())
 
 <script>
-        function deleteAccount(el){
-         var parent = $(el).parents("tr");
-                  var id = parent.find("th:eq(0)").text();
+            function deleteAccount(el){
+             var parent = $(el).parents("tr");
+                      var id = parent.find("th:eq(0)").text();
 
-                      $.ajax({
-                      type: "DELETE",
-                      url: "@Url.Action("DeleteUser","Account")",
-                      data: { id: id },
-                      dataType: "text",
-                      success: function (result) {
-                       if (result == "success")
-                       {
-                           parent.hide();
-                           toastr.success('User deleted');
-                       }
-                       else
-                           alert(result);
-                      },
-                      error: function (xhr, status, error) {
-                          console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                          $.ajax({
+                          type: "DELETE",
+                          url: "@Url.Action("DeleteUser","Account")",
+                          data: { id: id },
+                          dataType: "text",
+                          success: function (result) {
+                           if (result == "success")
+                           {
+                               parent.remove();
+                               toastr.success('User deleted');
+                               displayTable(currentPage)
+                           }
+                           else
+                               alert(result);
+                          },
+                          error: function (xhr, status, error) {
+                              console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                          }
+                      });
+                     }
+
+               $(".AddUser").submit(function(e) {
+                          e.preventDefault();
+                          var email = $('.userName').val();
+                var password = $('.userPassword').val();
+                var confirmPassword = $('.userConfirmPassword').val();
+
+                if(email.length != 0 && password.length != 0 && confirmPassword.length != 0 && password === confirmPassword) {
+                          $.ajax({
+                          type: "PUT",
+                          url: "@Url.Action("Register","Account")",
+                          data: $(this).serialize(),
+                          dataType: "html",
+                          success: function (result) {
+                           if (result == "success")
+                           {
+                                $('.AccountTable').load("@Url.Action("AccountTable","Account")", function(responseTxt, statusTxt, xhr){
+                               if(statusTxt == "success")
+                                displayTable(currentPage);
+                               if(statusTxt == "error")
+                               alert("Error: " + xhr.status + ": " + xhr.statusText);
+                                });
+                                $('.modal').modal('hide');
+                                toastr.success('User added');
+                           }
+                          },
+                          error: function (xhr, status, error) {
+                              toastr.error('The user exists or incorrect data was entered');
+                               $('.modal').modal('hide');
+                              console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText);
+                          }
+                      });
+                      }
+                      else{
+                      toastr.warning("Passwords don't match");
                       }
                   });
-                 }
 
-           $(".AddUser").submit(function(e) {
-                      e.preventDefault();
-                      var email = $('.userName').val();
-            var password = $('.userPassword').val();
-            var confirmPassword = $('.userConfirmPassword').val();
+                  $(".addUserModal").click(function(e) {
+                          $(".AddUser")[0].reset();
+                   });
 
-            if(email.length != 0 && password.length != 0 && confirmPassword.length != 0 && password === confirmPassword) {
-                      $.ajax({
-                      type: "PUT",
-                      url: "@Url.Action("Register","Account")",
-                      data: $(this).serialize(),
-                      dataType: "html",
-                      success: function (result) {
-                       if (result == "success")
-                       {
-                            $('.AccountTable').load("@Url.Action("AccountTable","Account")");
-                            $('.modal').modal('hide');
-                            toastr.success('User added');
-                       }
-                      },
-                      error: function (xhr, status, error) {
-                          toastr.error('The user exists or incorrect data was entered');
-                           $('.modal').modal('hide');
-                          console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText);
-                      }
-                  });
-                  }
-                  else{
-                  toastr.warning("Passwords don't match");
-                  }
-              });
+            function sortTable(column) {
+               var table, rows, switching, i, x, y, shouldSwitch, dir, numberOfColumn, switchcount = 0;
 
-              $(".addUserModal").click(function(e) {
-                      $(".AddUser")[0].reset();
-               });
+                   numberOfColumn = column.cellIndex-1;
 
-        function sortTable(column) {
-           var table, rows, switching, i, x, y, shouldSwitch, dir, numberOfColumn, switchcount = 0;
+               table = document.querySelector('.table');
+               switching = true;
+               dir = "asc";
+               while (switching) {
+                   switching = false;
+                   rows = table.rows;
+                   for (i = 1; i < (rows.length - 1); i++) {
+                       shouldSwitch = false;
 
-               numberOfColumn = column.cellIndex-1;
-
-           table = document.querySelector('.table');
-           switching = true;
-           dir = "asc";
-           while (switching) {
-               switching = false;
-               rows = table.rows;
-               for (i = 1; i < (rows.length - 1); i++) {
-                   shouldSwitch = false;
-
-                       x = rows[i].getElementsByTagName("TD")[numberOfColumn];
-                       y = rows[i + 1].getElementsByTagName("TD")[numberOfColumn];
-                       if (dir == "asc") {
-                           if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                               shouldSwitch = true;
-                               break;
+                           x = rows[i].getElementsByTagName("TD")[numberOfColumn];
+                           y = rows[i + 1].getElementsByTagName("TD")[numberOfColumn];
+                           if (dir == "asc") {
+                               if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                   shouldSwitch = true;
+                                   break;
+                               }
                            }
-                       }
-                       else if (dir == "desc") {
-                           if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                               shouldSwitch = true;
-                               break;
+                           else if (dir == "desc") {
+                               if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                   shouldSwitch = true;
+                                   break;
+                               }
                            }
-                       }
-               }
+                   }
 
-               if (shouldSwitch) {
-                   rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                   switching = true;
-                   switchcount++;
-               }
-               else {
-                   if (switchcount == 0 && dir == "asc") {
-                       dir = "desc";
+                   if (shouldSwitch) {
+                       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                        switching = true;
+                       switchcount++;
+                   }
+                   else {
+                       if (switchcount == 0 && dir == "asc") {
+                           dir = "desc";
+                           switching = true;
+                       }
                    }
                }
+               displayTable(currentPage)
            }
-       }
 
-    //$(document).ready(function () {
-    //    $('.table').after('<nav aria-label="Page navigation example"><ul class="pagination justify-content-end"></ul></nav>');
-    //    var rowsTotal = $('.table tbody tr').length;
-    //    var countRows = ($(window).height() - $('.table-thead').height() - $('.navbar').height()) / $('.table tbody tr:first').height();
-    //    var rowsShown = $('.table').height() < $(window).height() ? rowsTotal : countRows;
-    //    var numPages = rowsTotal / rowsShown;
-    //    for (i = 0; i < numPages; i++) {
-    //        var pageNum = i + 1;
-    //        $('.pagination').append('<li class="page-item"><a class="page-link" href="#" rel="' + i + '">' + pageNum + '</a></li> ');
-    //    }
-    //    $('.table tbody tr').hide();
-    //    $('.table tbody tr').slice(0, rowsShown).show();
-    //    $('.pagination a:first').addClass('font-weight-bold');
-    //    $('.pagination a').bind('click', function () {
-    //        $('.pagination a').removeClass('font-weight-bold');
-    //        $(this).addClass('font-weight-bold');
-    //        var currPage = $(this).attr('rel');
-    //        var startItem = currPage * rowsShown;
-    //        var endItem = startItem + rowsShown;
-    //        $('.table tbody tr').css('opacity', '0.0').hide().slice(startItem, endItem).
-    //            css('display', 'table-row').animate({ opacity: 1 }, 300);
-    //    });
-    //});
+    var rowsTotal = $('.table tbody tr').length;
+    var countRows = Math.floor(($(window).height() - $('.table-thead').height() - $('.navbar').height()) / $('.table tbody tr:first').height());
+    var rowsShown = $('.table').height() < $(window).height() ? rowsTotal : countRows;
+    const rowsPerPage = $('.table').height() < $(window).height() ? rowsTotal : countRows;
+    let currentPage = 1;
 
-     $('#search').on('keyup', function () {
-        tableSearch();
-    });
+    function displayTable(page) {
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const rows = Array.from(document.querySelectorAll('.table tbody tr'));
+        rows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? '' : 'none';
+        });
+    }
 
-    function tableSearch() {
-        var table = document.querySelector('.table');
-        var flag = false;
-        for (var i = 1; i < table.rows.length; i++) {
-            flag = false;
-            for (var j = table.rows[i].cells.length - 2; j > 0; j--) {
-                flag = table.rows[i].cells[j].innerHTML.toLowerCase().startsWith($("#search").val().toLowerCase());
-                if (flag) {
-                    break;
-                }
-            }
+    function setupPagination() {
+        const rows = Array.from(document.querySelectorAll('.table tbody tr'));
+        const pageCount = Math.ceil(rows.length / rowsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
 
-            if (flag) {
-                table.rows[i].style.display = "";
-            }
-            else {
-                table.rows[i].style.display = "none";
-            }
+        for (let i = 1; i <= pageCount; i++) {
+            const button = document.createElement('button');
+            button.innerText = i;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                displayTable(currentPage);
+            });
+            pagination.appendChild(button);
         }
     }
+
+    displayTable(currentPage);
+    setupPagination();
+
+         $('#search').on('keyup', function () {
+             if($("#search").val()=='' || $("#search").val()=="undefined" || $("#search").val()==null)
+             {
+             displayTable(currentPage);
+             }
+             else{
+            tableSearch();
+             }
+         });
+
+        function tableSearch() {
+            var table = document.querySelector('.table');
+            var flag = false;
+            for (var i = 1; i < table.rows.length; i++) {
+                flag = false;
+                for (var j = table.rows[i].cells.length - 2; j > 0; j--) {
+                    flag = table.rows[i].cells[j].innerHTML.toLowerCase().startsWith($("#search").val().toLowerCase());
+                    if (flag) {
+                        break;
+                    }
+                }
+
+                if (flag) {
+                    table.rows[i].style.display = "";
+                }
+                else {
+                    table.rows[i].style.display = "none";
+                }
+            }
+        }
 </script>
