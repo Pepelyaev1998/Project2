@@ -184,6 +184,12 @@
         rows.forEach((row, index) => {
             row.style.display = (index >= start && index < end) ? '' : 'none';
         });
+        document.getElementById('prev-button').disabled = currentPage === 1;
+        document.getElementById('next-button').disabled = end >= rows.length;
+        const buttons = Array.from(document.querySelectorAll('#pagination button'));
+            buttons.forEach((button, index) => {
+                (index == currentPage) ? button.classList.add('btn-dark') : button.classList.remove('btn-dark');
+            });
     }
 
     function setupPagination() {
@@ -192,18 +198,39 @@
         const pagination = document.getElementById('pagination');
         pagination.innerHTML = '';
 
+        const buttonPrev = document.createElement('button');
+            buttonPrev.innerText = '<';
+            buttonPrev.id = 'prev-button'
+             pagination.appendChild(buttonPrev);
         for (let i = 1; i <= pageCount; i++) {
             const button = document.createElement('button');
             button.innerText = i;
+            button.className = i === currentPage ? 'btn-dark' : '';
             button.addEventListener('click', () => {
                 currentPage = i;
                 displayTable(currentPage);
             });
             pagination.appendChild(button);
         }
+
+        const buttonNext = document.createElement('button');
+            buttonNext.innerText = '>';
+            buttonNext.id = 'next-button';
+             pagination.appendChild(buttonNext);
     }
 
-    displayTable(currentPage);
     setupPagination();
+    displayTable(currentPage);
+            document.getElementById('prev-button').addEventListener('click', () => {
+        if (currentPage > 1) currentPage--;
+        displayTable(currentPage);
+    });
+
+    document.getElementById('next-button').addEventListener('click', () => {
+        const end = currentPage * rowsPerPage;
+        if (end < rowsTotal) currentPage++;
+        displayTable(currentPage);
+    });
+
 </script>
 
