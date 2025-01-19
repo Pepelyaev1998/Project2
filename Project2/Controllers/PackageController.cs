@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using Project2.Models;
@@ -17,18 +18,22 @@ namespace Project2.Controllers
     {
         IEntityRepository entityRepository { get; set; }
         private readonly IHostingEnvironment hostingEnvironment;
+        IMemoryCache cache;
 
-        public PackageController(IEntityRepository entityRepository, IHostingEnvironment hostingEnvironment)
+        public PackageController(IEntityRepository entityRepository, IHostingEnvironment hostingEnvironment, IMemoryCache memoryCache)
         {
             this.entityRepository = entityRepository;
             this.hostingEnvironment = hostingEnvironment;
+            this.cache = memoryCache;
 
         }
 
         [HttpGet]
         public async Task<IActionResult> Packages()
         {
+
             var packages = await entityRepository.Packages.ToListAsync();
+            packages.ForEach(x => cache.Set(x.Id, x));
 
             return View(packages);
         }
@@ -46,9 +51,15 @@ namespace Project2.Controllers
         [HttpGet]
         public async Task<IActionResult> EditPackage(int? id)
         {
+            Package package;
             if (id != null)
             {
-                var package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.Id == id);
+                cache.TryGetValue(id, out package);
+                if (package == null)
+                {
+                    package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.Id == id);
+                }
+
                 if (package != null)
 
                     return View(package);
@@ -66,6 +77,8 @@ namespace Project2.Controllers
                 package.LastDateOfUpdate = DateTime.Now;
                 entityRepository.SaveEntity(package);
                 await entityRepository.SaveChanges();
+                cache.Remove(package.Id);
+                cache.Set(package.Id, package);
 
                 return RedirectToAction("Packages");
             }
@@ -77,13 +90,20 @@ namespace Project2.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeletePackage(int? id)
         {
+            Package package;
+
             if (id != null)
             {
-                var package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.Id == id);
+                cache.TryGetValue(id, out package);
+                if (package == null)
+                {
+                    package = await entityRepository.Packages.FirstOrDefaultAsync(p => p.Id == id);
+                }
                 if (package != null)
                 {
                     entityRepository.DeleteEntity(package);
                     await entityRepository.SaveChanges();
+                    cache.Remove(package.Id);
 
                     return Ok("success");
                 }
@@ -103,6 +123,7 @@ namespace Project2.Controllers
                     packageModel.LastDateOfUpdate = DateTime.Now;
                     entityRepository.SaveEntity(packageModel);
                     await entityRepository.SaveChanges();
+                    cache.Set(package.Id, packageModel);
                     return Ok("success");
                 }
             }

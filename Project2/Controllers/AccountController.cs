@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Project2.Models;
 using Project2.Services;
 using Project2.ViewModels;
@@ -20,16 +21,18 @@ namespace Project2.Controllers
         IEntityRepository entityRepository { get; set; }
         private readonly string error = "Incorrect login and/or password";
         private readonly EmailService emailService;
+        IMemoryCache cache;
 
         //public AccountController(DBContext context)
         //{
         //    db = context;
         //}
 
-        public AccountController(IEntityRepository entityRepository, EmailService emailService)
+        public AccountController(IEntityRepository entityRepository, EmailService emailService, IMemoryCache memoryCache)
         {
             this.entityRepository = entityRepository;
             this.emailService = emailService;
+            this.cache = memoryCache;
         }
 
         [HttpGet]
